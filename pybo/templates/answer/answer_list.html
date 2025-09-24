@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <h5 class="my-3 border-bottom pb-2">최근 답변</h5>
+    <table class="table">
+        <thead>
+        <tr class="text-center thead-dark">
+            <th>번호</th>
+            <th style="width:40%">답변 내용</th>
+            <th>질문</th>
+            <th>글쓴이</th>
+            <th>작성일시</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if answer_list.items %}
+        {% for answer in answer_list.items %}
+        <tr class="text-center">
+            <td>{{ answer_list.total - ((answer_list.page-1) * answer_list.per_page) - loop.index0 }}</td>
+            <td class="text-left">
+                {% if answer.question %}
+                <a href="{{ url_for('question.detail', question_id=answer.question.id) }}#answer_{{ answer.id }}">
+                    {{ answer.content|striptags|truncate(80) }}
+                </a>
+                {% else %}
+                    <span class="text-muted">(삭제된 질문에 대한 답변)</span>
+                {% endif %}
+            </td>
+            <td class="text-left">
+                {% if answer.question %}
+                <a href="{{ url_for('question.detail', question_id=answer.question.id) }}">
+                    {{ answer.question.subject|truncate(30) }}
+                </a>
+                {% else %}
+                    <span class="text-muted">(삭제된 질문)</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if answer.user %}<a href="{{ url_for('user.profile', user_id=answer.user.id) }}" class="text-decoration-none text-dark">{{ answer.user.username }}</a>
+                {% else %}<span class="text-muted">(탈퇴한 사용자)</span>{% endif %}
+            </td>
+            <td>{{ answer.create_date|datetime }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="5">답변이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <!-- 페이징처리 시작 -->
+    <ul class="pagination justify-content-center">
+        <!-- 이전페이지 -->
+        {% if answer_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('question.recent_answers', page=answer_list.prev_num) }}">이전</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">이전</a>
+        </li>
+        {% endif %}
+        {% for page_num in answer_list.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != answer_list.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('question.recent_answers', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active" aria-current="page">
+                    <a class="page-link" href="javascript:void(0)">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+                <li class="disabled"><a class="page-link" href="javascript:void(0)">...</a></li>
+            {% endif %}
+        {% endfor %}
+        <!-- 다음페이지 -->
+        {% if answer_list.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('question.recent_answers', page=answer_list.next_num) }}">다음</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">다음</a></li>
+        {% endif %}
+    </ul>
+    <!-- 페이징처리 끝 -->
+</div>
+{% endblock %}

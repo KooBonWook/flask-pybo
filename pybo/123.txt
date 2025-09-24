@@ -1,0 +1,36 @@
+from flask_wtf import FlaskForm
+# Flask와 WTForms를 쉽게 통합해주는 FlaskForm 클래스를 가져옵니다. 모든 폼은 이 클래스를 상속받아야 합니다. Flask와 WTForms를 쉽게 통합해주는 FlaskForm 클래스를 가져옵니다. 모든 폼은 이 클래스를 상속받아야 합니다.
+
+from wtforms import StringField, PasswordField
+폼을 구성할 필드 종류(StringField, PasswordField)를 가져옵니다.
+
+from wtforms.validators import DataRequired, Length, EqualTo, Email
+입력값의 유효성을 검증하는 규칙들을 가져옵니다.
+DataRequired: 필수 입력 필드임을 나타냅니다.
+Length: 입력값의 길이를 제한합니다.
+EqualTo: 다른 필드의 값과 일치하는지 확인합니다. (비밀번호와 비밀번호 확인)
+Email: 올바른 이메일 형식인지 확인합니다.
+
+
+class UserCreateForm(FlaskForm):
+    """
+    사용자 등록을 위한 폼
+    """
+    username = StringField('사용자이름', validators=[
+        DataRequired(message='사용자이름은 필수입니다.'),
+        Length(min=3, max=25, message='사용자이름은 3자 이상 25자 이하로 입력해주세요.')
+    ])
+    password = PasswordField('비밀번호', validators=[
+        DataRequired(message='비밀번호는 필수입니다.'),
+        EqualTo('password_confirm', '비밀번호가 일치하지 않습니다.')
+    ])
+    password_confirm = PasswordField('비밀번호 확인', validators=[
+        DataRequired(message='비밀번호 확인은 필수입니다.')
+    ])
+    email = StringField('이메일', validators=[
+        DataRequired(message='이메일은 필수입니다.'),
+        Email(message='올바른 이메일 형식이 아닙니다.
+
+
+class: FlaskForm을 상속받아 사용자 등록 폼 클래스를 정의합니다.
+username, password, email 등: 폼을 구성하는 각 필드를 정의하고, validators 인자를 통해 해당 필드에 적용할 유효성 검사 규칙을 리스트 형태로 전달합니다.

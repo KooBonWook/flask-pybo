@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">답변 수정</h5>
+    <form method="post" action="{{ url_for('answer.modify', answer_id=answer.id) }}" class="my-3" id="answer-form">
+        {{ form.csrf_token }}
+
+        <!-- 오류 표시 -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for field, errors in form.errors.items() %}
+            <strong>{{ form[field].label }}</strong>
+            <ul>
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+            {{ form.content.label(class="form-label") }}
+            {{ form.content(class="form-control", rows=10) }}
+        </div>
+        <button type="submit" class="btn btn-primary">저장하기</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    // content 필드에 SimpleMDE 적용 및 폼 전송 처리
+    const contentTextarea = document.getElementById("content");
+    let simplemde;
+    if (contentTextarea) {
+        simplemde = new SimpleMDE({ element: contentTextarea });
+    }
+
+    // 폼 전송 시 SimpleMDE의 내용을 textarea에 복사
+    const form = document.getElementById('answer-form');
+    form.addEventListener('submit', function() {
+        if (simplemde) contentTextarea.value = simplemde.value();
+    });
+</script>
+{% endblock %}

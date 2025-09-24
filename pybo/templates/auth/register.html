@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}회원가입{% endblock %}
+{% block content %}
+<div class="container my-3">
+    <h1 class="mb-4">회원가입(계정생성)</h1>
+
+    <!-- 오류 표시 -->
+    {% include 'form_errors.html' %}
+    <!-- 필드 체크  -->
+    <form method="POST" class="my-3">
+        {{ form.csrf_token }}
+        <div class="mb-3">
+            {{ form.username.label(for="username") }}
+            {{ form.username(class="form-control", id="username") }}
+        </div>
+        <div class="mb-3">
+            {{ form.password.label(for="password") }}
+            {{ form.password(class="form-control", id="password") }}
+        </div>
+        <div class="mb-3">
+            {{ form.password_confirm.label(for="password_confirm") }}
+            {{ form.password_confirm(class="form-control", id="password_confirm") }}
+        </div>
+        <div class="mb-3">
+            {{ form.email.label(for="email") }}
+            {{ form.email(class="form-control", id="email") }}
+        </div>
+        <button type="submit" class="btn btn-primary">생성하기</button>
+    </form>
+</div>
+{% endblock %}

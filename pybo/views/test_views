@@ -1,0 +1,37 @@
+from flask import Blueprint, url_for, render_template
+from werkzeug.utils import redirect
+
+bp = Blueprint('main', __name__, url_prefix='/')
+
+print('main view start !!')
+@bp.route('/hello')
+def hello_pybo():
+    return 'Hello, Pybo! hello'
+
+@bp.route('/')
+def index():
+    #return redirect(url_for('question._list'))
+    print('main view index question._list')
+    return redirect(url_for('question._list'))
+    #return render_template('question/question_list.html', question_list=question_list)
+    #return 'Pybo index test'
+
+# #### login 및 등록 
+# @bp.route('register')
+# def register():
+#     return render_template('register.html')
+
+# @bp.route('login')
+# def login():
+#     return render_template('login.html')
+# #######
+"""
+@bp.route('/detail/<int:question_id>/')
+def detail(question_id):
+    question = question.query.get_or_404(question_id)
+    return render_template('question/question_detail.html', question=question)
+"""
+## localhost:5000에 접속하면 / URL에 매핑된 index 함수가
+## 호출되어 "Pybo index"가 출력되고, 
+## localhost:5000/hello에 접속하면 /hello URL에 매핑된 hello_pybo 함수가
+## 호출되어 "Hello, Pybo!"가 출력된다.

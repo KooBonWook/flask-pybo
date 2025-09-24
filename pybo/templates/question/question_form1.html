@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- 질문 등록 -->
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <form method="post" action="{{ url_for('question.create') }}" class="my-3">
+        {{ form.csrf_token }}
+
+        <!-- 오류 표시 -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for field, errors in form.errors.items() %}
+                <strong>{{ form[field].label }}</strong>
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </div>
+          <!-- 오류 표시 끝 -->
+        {% else %}
+          <div class="mb-3">
+           <label> 제 목 :</label>                      
+            {{ form.subject.label }}
+            {{ form.subject(class="form-control", id="subject") }}  # Flask-WTF 필드 사용
+           <!-- <label for="subject"></label>
+           <input type="text" class="form-control" name="subject" id="subject" 
+               value="{{ form.subject.data or '' }}"> -->
+          </div>
+          <div class="mb-3">
+            <label> 내 용 :</label>
+            {{ form.content.label }}
+            {{ form.content(class="form-control", id="content", rows=50) }}  Flask-WTF 필드 사용
+            <!-- <label for="content"></label>
+            <textarea class="form-control" name="content" id="content" rows="10">{{ form.content.data or '' }}</textarea> -->
+          </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">저장하기</button>
+        
+    </form>
+</div>
+{% endblock %}

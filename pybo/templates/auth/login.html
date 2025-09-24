@@ -1,0 +1,26 @@
+<!--
+<!DOCTYPE html>
+-->
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">로그인</h5>
+
+    <form method="POST">
+        {{ form.csrf_token }}
+        <!-- include 처리 -->
+        {% include "form_errors.html" %}
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control") }}
+        </div>
+        <button type="submit" class="btn btn-primary">로그인</button>
+        <a href="{{ url_for('auth.find_password') }}" class="btn btn-link">비밀번호를 잊으셨나요?</a>
+    </form>
+</div>
+{% endblock %}

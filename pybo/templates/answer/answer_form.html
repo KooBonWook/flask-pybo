@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">답변 수정</h5>
+    <form method="post" action="{{ url_for('answer.modify', answer_id=answer.id) }}" class="my-3" id="answer-modify-form">
+        {{ form.csrf_token }}
+        {% include "form_errors.html" %}
+        <div class="mb-3">
+            {{ form.content.label(class="form-label") }}
+            {{ form.content(class="form-control", rows=10, id="content") }}
+        </div>
+        <button type="submit" class="btn btn-primary">저장하기</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+    // content 필드에 SimpleMDE 적용
+    const contentTextarea = document.getElementById('content');
+    let simplemde;
+    if (contentTextarea) {
+        simplemde = new SimpleMDE({ element: contentTextarea });
+    }
+
+    // "저장하기" 버튼 클릭 시 SimpleMDE의 내용을 textarea에 복사
+    const submitButton = document.querySelector('#answer-modify-form button[type="submit"]');
+    submitButton.addEventListener('click', function() {
+        if (simplemde) contentTextarea.value = simplemde.value();
+    });
+</script>
+{% endblock %}
