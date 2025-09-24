@@ -36,7 +36,7 @@ def register():
         else:
             # UserCreateForm에 비밀번호와 비밀번호 확인 필드가 password, password_confirm로 정의되었다고 가정합니다.
             user = User(username=form.username.data,
-                        password=generate_password_hash(form.password.data),
+                        password=generate_password_hash(form.password.data, method='pbkdf2:sha256'),
                         email=form.email.data)
             db.session.add(user)
             db.session.commit()
@@ -83,7 +83,7 @@ def change_password():
         elif form.new_password1.data == form.old_password.data:
             flash('새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.', 'error')
         else:
-            user.password = generate_password_hash(form.new_password1.data)
+            user.password = generate_password_hash(form.new_password1.data, method='pbkdf2:sha256')
             db.session.commit()
             flash('비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.', 'success')
             return redirect(url_for('auth.logout'))
@@ -131,7 +131,7 @@ def reset_password(token):
 
     form = PasswordResetForm()
     if request.method == 'POST' and form.validate_on_submit():
-        user.password = generate_password_hash(form.new_password1.data)
+        user.password = generate_password_hash(form.new_password1.data, method='pbkdf2:sha256')
         db.session.commit()
         flash('비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.', 'success')
         return redirect(url_for('auth.login'))

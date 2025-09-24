@@ -46,6 +46,16 @@ def create_app():
     from .views import main_views, question_views, answer_views, auth_views, user_views, comment_views
 
     # 카테고리별 게시판 기능 추가
+    with app.app_context():
+        # 기본 카테고리가 없으면 생성
+        if not models.Category.query.first():
+            default_categories = ['질문과답변', '자유게시판', '강좌', '팁과노하우']
+            for category_name in default_categories:
+                category = models.Category(name=category_name)
+                db.session.add(category)
+            db.session.commit()
+            print("Default categories created.")
+
     @app.context_processor
     def inject_categories():
         return dict(category_list=models.Category.query.all())

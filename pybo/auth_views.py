@@ -1,13 +1,14 @@
-from flask import Blueprint, url_for, render_template, flash, request, session, g
+from flask import Blueprint, url_for, render_template, flash, request, session, g, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import redirect
 import functools
-from datetime import datetime
-    
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+from flask_mail import Message
 
 from pybo import db
-from pybo.forms import UserCreateForm, UserLoginForm, PasswordChangeForm, FindPasswordForm
+from pybo.forms import UserCreateForm, UserLoginForm, PasswordChangeForm, FindPasswordForm, PasswordResetForm
 from pybo.models import User
+from pybo import mail
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -36,10 +37,8 @@ def register():
         else:
             # UserCreateForm에 비밀번호와 비밀번호 확인 필드가 password, password_confirm로 정의되었다고 가정합니다.
             user = User(username=form.username.data,
-                        password=generate_password_hash(form.password.data),
-                        email=form.email.data
-                        create_date=datetime.now()  # create date 현재시간으로 설정 
-                        )
+                        password=generate_password_hash(form.password.data, method='pbkdf2:sha256'),
+                        email=form.email.data)
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('main.index'))
@@ -85,7 +84,7 @@ def change_password():
         elif form.new_password1.data == form.old_password.data:
             flash('새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.', 'error')
         else:
-            user.password = generate_password_hash(form.new_password1.data)
+            user.password = generate_password_hash(form.new_password1.data, method='pbkdf2:sha256')
             db.session.commit()
             flash('비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.', 'success')
             return redirect(url_for('auth.logout'))
@@ -95,10 +94,50 @@ def change_password():
 def find_password():
     form = FindPasswordForm()
     if request.method == 'POST' and form.validate_on_submit():
-        # TODO: 여기에 이메일로 비밀번호 재설정 링크를 보내는 로직을 구현해야 합니다.
-        flash('비밀번호 재설정 안내 메일을 발송했습니다. (실제 발송 기능은 구현해야 합니다.)', 'info')
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            # 1. 토큰 생성
+            serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+            token = serializer.dumps(user.email, salt='password-reset-salt')
+
+            # 2. 이메일 발송
+            reset_url = url_for('auth.reset_password', token=token, _external=True)
+            msg = Message(
+                subject="[Pybo] 비밀번호 재설정 안내",
+                sender=("Pybo", current_app.config.get('MAIL_USERNAME')),
+                recipients=[user.email],
+                html=render_template('auth/email/reset_password.html', reset_url=reset_url)
+            )
+            mail.send(msg)
+            flash('비밀번호 재설정 안내 메일을 발송했습니다. 이메일을 확인해주세요.', 'info')
+        else:
+            flash('가입되지 않은 이메일입니다. 이메일 주소를 다시 확인해주세요.', 'error')
         return redirect(url_for('auth.login'))
     return render_template('auth/find_password.html', form=form)
+
+@bp.route('/reset_password/<token>', methods=('GET', 'POST'))
+def reset_password(token):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        # 토큰 유효기간: 1시간 (3600초)
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
+    except (SignatureExpired, BadTimeSignature):
+        flash('비밀번호 재설정 링크가 만료되었거나 유효하지 않습니다.', 'error')
+        return redirect(url_for('auth.find_password'))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('유효하지 않은 링크입니다.', 'error')
+        return redirect(url_for('auth.login'))
+
+    form = PasswordResetForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        user.password = generate_password_hash(form.new_password1.data, method='pbkdf2:sha256')
+        db.session.commit()
+        flash('비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/reset_password.html', form=form)
 
 @bp.before_app_request
 def load_logged_in_user():
