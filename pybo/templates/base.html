@@ -15,7 +15,7 @@
             height: auto;
         }
     </style>
-    <title>파이보 월드 !</title>
+    <title>Pybo World Welcome!</title>
 </head>
 <body>
 <!-- 네비게이션바 -->
@@ -57,8 +57,8 @@
                         {{ g.user.username }}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownUser">
-                        <a class="dropdown-item" href="{{ url_for('user.profile_current_user') }}">내 프로필</a>
-                        <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">비밀번호 변경</a>
+                        <a class="dropdown-item" href="{{ url_for('user.profile_current_user') }}">My 프로필</a>
+                        <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">Password 변경</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url_for('auth.logout') }}">로그아웃</a>
                     </div>
